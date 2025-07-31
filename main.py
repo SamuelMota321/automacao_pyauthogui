@@ -20,29 +20,17 @@ pyautogui.PAUSE = 0.5
 """Substituir as coordenadas x e y nos FIELD_MAPPINGS pelas coletadas do sistema interno.
 conferir csv_column para garantir que batem exatamente com os cabeçalhos do seu tabela_extraida.csv."""
 FIELD_MAPPINGS = {
-    "unidade_negocio": {"csv_column": "UNIDADE DE NEGÓCIO", "x": 100, "y": 150, "transform_func": str.strip},
-    "tipo_analise": {"csv_column": "TIPO DE ANALISE", "x": 100, "y": 180, "transform_func": str.strip},
-    "cadastro_pat": {"csv_column": "CADASTRO PAT", "x": 100, "y": 210, "transform_func": str.strip},
-    "numero_contrato": {"csv_column": "Nº DO CONTRATO", "x": 100, "y": 240, "transform_func": str.strip},
-    "razao_social": {"csv_column": "Razão Social", "x": 300, "y": 150, "transform_func": str.strip},
-    "nome_fantasia": {"csv_column": "Nome Fantasia", "x": 300, "y": 180, "transform_func": str.strip},
-    "cnpj": {"csv_column": "CNPJ", "x": 300, "y": 210, "transform_func": lambda x: str(x).replace('.', '').replace('/', '').replace('-', '') if pd.notna(x) else ''},
-    "inscricao_estadual": {"csv_column": "Inscrição Estadual", "x": 300, "y": 240, "transform_func": lambda x: str(int(x)) if pd.notna(x) else ''}, # Converte para int antes de str
+    "razao_social": {"csv_column": "Razão Social", "x": 271, "y": 178, "transform_func": str.strip},
+    "nome_fantasia": {"csv_column": "Nome Fantasia", "x": 261, "y": 197, "transform_func": str.strip},
+    "cnpj": {"csv_column": "CNPJ", "x": 686, "y": 176, "transform_func": lambda x: str(x).replace('.', '').replace('/', '').replace('-', '') if pd.notna(x) else ''},
+    "inscricao_estadual": {"csv_column": "Inscrição Estadual", "x": 207, "y": 215, "transform_func": lambda x: str(int(x)) if pd.notna(x) else ''}, # Converte para int antes de str
     "endereco": {"csv_column": "Endereço", "x": 300, "y": 270, "transform_func": str.strip},
     "responsavel_dados_cadastrais": {"csv_column": "Responsável", "x": 300, "y": 300, "transform_func": str.strip},
-    "telefone_responsavel": {"csv_column": "Telefone", "x": 300, "y": 330, "transform_func": str.strip},
-    "bairro": {"csv_column": "Bairro", "x": 300, "y": 360, "transform_func": str.strip},
-    "cidade": {"csv_column": "Cidade", "x": 300, "y": 390, "transform_func": str.strip},
-    "uf": {"csv_column": "UF", "x": 300, "y": 420, "transform_func": str.strip},
-    "cep": {"csv_column": "CEP", "x": 300, "y": 450, "transform_func": lambda x: str(x).replace('-', '') if pd.notna(x) else ''},
-
-    "nfe_responsavel": {"csv_column": "NFE Responsavel", "x": 500, "y": 150, "transform_func": str.strip},
-    "nfe_email": {"csv_column": "NFE Email", "x": 500, "y": 180, "transform_func": str.lower},
-    "nfe_telefone": {"csv_column": "NFE Telefone", "x": 500, "y": 210, "transform_func": str.strip},
-
-    "metodo_pagamento": {"csv_column": "Método de Pagamento", "x": 700, "y": 150, "transform_func": str.strip},
-    "qtde_vidas": {"csv_column": "Qtde de Vidas", "x": 700, "y": 180, "transform_func": lambda x: str(int(x)) if pd.notna(x) else ''},
-    "limite_credito_cliente_rs": {"csv_column": "Limite de Crédito Cliente (R$)", "x": 700, "y": 210, "transform_func": lambda x: str(float(str(x).replace('.', '').replace(',', '.'))) if pd.notna(x) else ''},
+    "telefone_responsavel": {"csv_column": "Telefone", "x": 659, "y": 434, "transform_func": str.strip},
+    "bairro": {"csv_column": "Bairro", "x": 150, "y": 420, "transform_func": str.strip},
+    "cidade": {"csv_column": "Cidade", "x": 150, "y": 400, "transform_func": str.strip},
+    "uf": {"csv_column": "UF", "x": 130, "y": 375, "transform_func": str.strip},
+    "cep": {"csv_column": "CEP", "x": 244, "y": 375, "transform_func": lambda x: str(x).replace('-', '') if pd.notna(x) else ''},
 }
 
 class DataExtractor:
