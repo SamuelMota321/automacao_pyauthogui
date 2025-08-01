@@ -2,7 +2,6 @@ import pandas as pd
 import os
 import time
 import pyautogui
-import csv
 
 # Para o script se der algo de errado
 pyautogui.FAILSAFE = True
@@ -20,17 +19,17 @@ pyautogui.PAUSE = 0.5
 """Substituir as coordenadas x e y nos FIELD_MAPPINGS pelas coletadas do sistema interno.
 conferir csv_column para garantir que batem exatamente com os cabeçalhos do seu tabela_extraida.csv."""
 FIELD_MAPPINGS = {
-    "razao_social": {"csv_column": "Razão Social", "x": 271, "y": 178, "transform_func": str.strip},
-    "nome_fantasia": {"csv_column": "Nome Fantasia", "x": 261, "y": 197, "transform_func": str.strip},
-    "cnpj": {"csv_column": "CNPJ", "x": 686, "y": 176, "transform_func": lambda x: str(x).replace('.', '').replace('/', '').replace('-', '') if pd.notna(x) else ''},
-    "inscricao_estadual": {"csv_column": "Inscrição Estadual", "x": 207, "y": 215, "transform_func": lambda x: str(int(x)) if pd.notna(x) else ''}, # Converte para int antes de str
-    "endereco": {"csv_column": "Endereço", "x": 300, "y": 270, "transform_func": str.strip},
-    "responsavel_dados_cadastrais": {"csv_column": "Responsável", "x": 300, "y": 300, "transform_func": str.strip},
-    "telefone_responsavel": {"csv_column": "Telefone", "x": 659, "y": 434, "transform_func": str.strip},
-    "bairro": {"csv_column": "Bairro", "x": 150, "y": 420, "transform_func": str.strip},
-    "cidade": {"csv_column": "Cidade", "x": 150, "y": 400, "transform_func": str.strip},
-    "uf": {"csv_column": "UF", "x": 130, "y": 375, "transform_func": str.strip},
-    "cep": {"csv_column": "CEP", "x": 244, "y": 375, "transform_func": lambda x: str(x).replace('-', '') if pd.notna(x) else ''},
+    "razao_social": {"csv_column": "Razão Social", "x": 250, "y": 165, "transform_func": str.strip},
+    "cnpj": {"csv_column": "CNPJ", "x": 650, "y": 165, "transform_func": lambda x: str(x).replace('.', '').replace('/', '').replace('-', '') if pd.notna(x) else ''},
+    "nome_fantasia": {"csv_column": "Nome Fantasia", "x": 250, "y": 185, "transform_func": str.strip},
+    "inscricao_estadual": {"csv_column": "Inscrição Estadual", "x": 250, "y": 205, "transform_func": lambda x: str(int(x)) if pd.notna(x) else ''}, # Converte para int antes de str
+    "uf": {"csv_column": "UF", "x": 130, "y": 365, "transform_func": str.strip},
+    "cep": {"csv_column": "CEP", "x": 244, "y": 365, "transform_func": lambda x: str(x).replace('-', '') if pd.notna(x) else ''},
+    "cidade": {"csv_column": "Cidade", "x": 150, "y": 390, "transform_func": str.strip},
+    "bairro": {"csv_column": "Bairro", "x": 150, "y": 410, "transform_func": str.strip},
+    "endereco": {"csv_column": "Endereço", "x": 150, "y": 430, "transform_func": str.strip},
+    "responsavel_dados_cadastrais": {"csv_column": "Responsável", "x": 750, "y": 365, "transform_func": str.strip},
+    "telefone_responsavel": {"csv_column": "Telefone", "x": 650, "y": 435, "transform_func": str.strip},
 }
 
 # --- Classes de Suporte ---
@@ -63,6 +62,7 @@ class DataExtractor:
             print(f"Dados pós-processados com sucesso. Total de registros: {len(processed_df)}")
             print("DataFrame pós-processado (primeiras 5 linhas):")
             print(processed_df.head())
+            processed_df.to_csv("visualizandoDadosTratados.csv", index=False)  # Salva o DataFrame pós-processado de volta no CSV
             return self.data
         except Exception as e:
             print(f"Erro ao carregar ou processar dados do CSV '{self.csv_file_path}': {e}")
@@ -110,11 +110,16 @@ class DataExtractor:
             elif "Endereço:" in col0:
                  # Endereço pode ter quebras de linha que precisam ser tratadas
                 current_record["Endereço"] = col0.replace("Endereço:", "").replace('\n', ' ').strip()
+            # Bloco NOVO e CORRIGIDO dentro de _process_raw_data
             elif "Bairro:" in col0:
-                current_record["Bairro"] = col0.replace("Bairro:", "").strip()
-                current_record["Cidade"] = col1.replace("Cidade:", "").strip()
-                current_record["CEP"] = col2.replace("CEP:", "").strip()
-                current_record["UF"] = col3.replace("UF:", "").strip()
+                # Para cada campo, primeiro removemos as quebras de linha ('\n'),
+                # depois separamos o rótulo do valor usando o ':',
+                # pegamos a segunda parte ([1]) e limpamos os espaços.
+
+                current_record["Bairro"] = col0.replace('\n', '').split(':')[1].strip()
+                current_record["Cidade"] = col1.replace('\n', '').split(':')[1].strip()
+                current_record["CEP"] = col2.replace('\n', '').split(':')[1].strip()
+                current_record["UF"] = col3.replace('\n', '').split(':')[1].strip()
 
             # --- DADOS OBRIGATÓRIOS (NFE) ---
             elif "Nota Fiscal Eletrônica - Responsável:" in col0:
@@ -231,8 +236,8 @@ class UISystemIntegrator:
         Preenche os campos no sistema interno usando PyAutoGUI e as coordenadas fornecidas.
         Retorna True em caso de sucesso (simulado), False caso ocorra um erro de automação.
         """
-        print(f"\nIniciando preenchimento de um novo registro. Você tem {self.initial_delay} segundos para posicionar a janela.")
-        time.sleep(self.initial_delay)
+        # print(f"\nIniciando preenchimento de um novo registro. Você tem {self.initial_delay} segundos para posicionar a janela.")
+        # time.sleep(self.initial_delay)
         print("Iniciando automação...")
 
         try:
@@ -264,14 +269,11 @@ class UISystemIntegrator:
 # --- Fluxo Principal de Execução ---
 
 class DataIntegrationApp:
-    """
-    Orquestra todo o processo de extração, mapeamento e integração de dados via UI.
-    """
     def __init__(self, pdf_file: str, output_csv: str, field_mappings: dict):
         self.pdf_file = pdf_file
         self.output_csv = output_csv
         self.field_mappings = field_mappings
-        self.data_extractor = DataExtractor(self.output_csv) # DataExtractor agora com pré-processamento
+        self.data_extractor = DataExtractor(self.output_csv)
         self.data_mapper = DataMapper(self.field_mappings)
         self.integrator = UISystemIntegrator()
 
@@ -286,6 +288,33 @@ class DataIntegrationApp:
         if df is None or df.empty:
             print("Nenhum dado válido para processar. Encerrando.")
             return
+
+
+        # preenchimento das partes que não são do PDF (CABEÇALHO)
+        # Multa por atraso
+        pyautogui.click(660, 188)
+        pyautogui.write('2')
+        
+        # Juros de Mora
+        pyautogui.click(880, 188)
+        pyautogui.write('3')
+        
+        # Matrícula Obrigatória
+        pyautogui.click(655, 209)
+       
+        # Tamanho da Matrícula
+        pyautogui.click(913, 210)
+        pyautogui.write('11')
+
+        # Tipo Cliente 
+        pyautogui.click(292, 231)
+        pyautogui.click(257, 266)
+
+        #Unidade de Negócio
+        pyautogui.click(801, 275)
+        pyautogui.keyDown('enter')
+        pyautogui.keyUp('enter')
+
 
         print(f"\nProcessando {len(df)} registros para integração UI...")
         for index, record in df.iterrows():
@@ -313,5 +342,6 @@ if __name__ == "__main__":
     PDF_FILE = 'Ploomes _ Clientes _ DAMASCO.pdf'
     OUTPUT_CSV_FILE = 'tabela_extraida.csv'
 
+    time.sleep(5)
     app = DataIntegrationApp(PDF_FILE, OUTPUT_CSV_FILE, FIELD_MAPPINGS)
     app.run()
